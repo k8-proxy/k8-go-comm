@@ -1,3 +1,23 @@
+<h1 align="center">k8-go-comm</h1>
+<p align="center">
+    <em> k8-go-comm library.</em>
+</p>
+
+<p align="center">
+    <a href="https://goreportcard.com/report/github.com/k8-proxy/k8-go-comm">
+        <img src="https://goreportcard.com/badge/k8-proxy/k8-go-comm" alt="Go Report Card">
+    </a>
+	<a href="https://github.com/k8-proxy/k8-go-comm/pulls">
+        <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat" alt="Contributions welcome">
+    </a>
+    <a href="https://opensource.org/licenses/Apache-2.0">
+        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache License, Version 2.0">
+    </a>
+    <a href="https://pkg.go.dev/github.com/k8-proxy/k8-go-comm">
+        <img src="https://godoc.org/github.com/k8-proxy/k8-go-comm?status.svg" alt="k8-go-comm">
+    </a>
+</p>
+
 # k8-go-comm
 
 Library to communicate with RabbitMQ and MinIO

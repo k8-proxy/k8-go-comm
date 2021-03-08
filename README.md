@@ -58,6 +58,10 @@ To start a connection and consume the message that was published, please check [
 
 ## MinIO
 
+### Create new bucket
+
+to create a new minio bucket , please check [createBucket directory](examples/createBucket)
+
 ### Make bucket and upload file
 
 To start a connection and upload a file, please check [minioUpload directory](examples/minioUpload)

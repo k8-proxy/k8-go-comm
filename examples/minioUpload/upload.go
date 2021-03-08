@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"os"
 
@@ -25,8 +24,14 @@ func main() {
 		log.Println(err)
 		return
 	}
-	fileContent := []byte("test")
-	uploadInfo, err := minio.UploadFileToMinio(client, bucketName, fileName, bytes.NewReader(fileContent))
+
+	fileContent, err := os.Open("/path/to /file")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	uploadInfo, err := minio.UploadFileToMinio(client, bucketName, fileName, fileContent)
 	if err != nil {
 		log.Println(err)
 		return

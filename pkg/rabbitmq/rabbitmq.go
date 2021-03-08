@@ -40,31 +40,31 @@ func NewInstance(rabbitHost string, rabbitPort string, messagebrokeruser string,
 
 }
 
-func NewQueueConsumer(connection *amqp.Connection, queueName string, exchange string, routingKey string) (<-chan amqp.Delivery, error) {
+func NewQueueConsumer(connection *amqp.Connection, queueName string, exchange string, routingKey string) (<-chan amqp.Delivery, *amqp.Channel, error) {
 
 	ch, err := connection.Channel()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = ch.ExchangeDeclare(exchange, "direct", true, false, false, false, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	q, err := ch.QueueDeclare(queueName, false, false, false, false, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	consumer, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 
-	return consumer, err
+	return consumer, ch, err
 
 }
 
@@ -99,7 +99,7 @@ func PublishMessage(channel *amqp.Channel, exchange string, routingKey string, h
 		false,      // mandatory
 		false,      // immediate
 		amqp.Publishing{
-			Headers:         amqp.Table{},
+			Headers:         header, ////????
 			ContentType:     "text/plain",
 			ContentEncoding: "",
 			Body:            message,

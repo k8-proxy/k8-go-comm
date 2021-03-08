@@ -1,9 +1,11 @@
 package minio
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -29,21 +31,18 @@ func NewMinioClient(endpoint string, accessKeyID string, secretAccessKey string,
 
 // UploadFileToMinio - uploads file to minio
 func UploadFileToMinio(client *minio.Client, bucketName string, objectName string, reader io.Reader) (minio.UploadInfo, error) {
-	found, err := client.BucketExists(context.Background(), bucketName)
+	conttype := "application/octet-stream"
+
+	f, err := ioutil.ReadAll(reader)
 	if err != nil {
-		log.Fatalln(err)
-		return minio.UploadInfo{}, err
-	}
-	if !found {
-		// Create a bucket at region 'us-east-1'
-		err = client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1"})
-		if err != nil {
-			log.Fatalln(err)
-			return minio.UploadInfo{}, err
-		}
+		log.Println(err)
 	}
 
-	uploadInfo, err := client.PutObject(context.Background(), bucketName, objectName, reader, -1, minio.PutObjectOptions{ContentType: "text/plain"})
+	conttype = http.DetectContentType(f[:511])
+	log.Println(conttype)
+	reader = bytes.NewReader(f)
+
+	uploadInfo, err := client.PutObject(context.Background(), bucketName, objectName, reader, -1, minio.PutObjectOptions{ContentType: conttype})
 	if err != nil {
 		log.Fatalln(err)
 		return uploadInfo, err
@@ -83,19 +82,6 @@ func GetPresignedURLForObject(client *minio.Client, bucketName string, objectNam
 
 // UploadAndReturnURL to upload a file with exp date and return its URL
 func UploadAndReturnURL(client *minio.Client, bucketName string, fileFullPath string, expiresIn time.Duration) (*url.URL, error) {
-	found, err := client.BucketExists(context.Background(), bucketName)
-	if err != nil {
-		log.Fatalln(err)
-		return &url.URL{}, err
-	}
-	if !found {
-		// Create a bucket at region 'us-east-1'
-		err = client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1"})
-		if err != nil {
-			log.Fatalln(err)
-			return &url.URL{}, err
-		}
-	}
 
 	contentType, err := getContentType(fileFullPath)
 	if err != nil {
@@ -154,4 +140,28 @@ func DownloadObject(cleanPresignedURL string, outputFileLocation string) error {
 	_, err = io.Copy(out, resp.Body)
 	return err
 
+}
+
+func CheckIfBucketExists(client *minio.Client, bucketName string) (bool, error) {
+
+	// Check to see if we already own this bucket
+	exists, errBucketExists := client.BucketExists(context.Background(), bucketName)
+
+	if errBucketExists != nil {
+		log.Fatalln(errBucketExists)
+	}
+
+	return exists, errBucketExists
+}
+
+//Create new bucket
+func CreateNewBucket(client *minio.Client, bucketName string) error {
+	opt := minio.MakeBucketOptions{Region: "us-east-1"}
+	err := client.MakeBucket(context.Background(), bucketName, opt)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return err
 }

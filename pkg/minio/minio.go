@@ -38,11 +38,13 @@ func UploadFileToMinio(client *minio.Client, bucketName string, objectName strin
 		log.Println(err)
 	}
 
+	size := int64(len(f))
+
 	conttype = http.DetectContentType(f[:511])
 	log.Println(conttype)
 	reader = bytes.NewReader(f)
 
-	uploadInfo, err := client.PutObject(context.Background(), bucketName, objectName, reader, -1, minio.PutObjectOptions{ContentType: conttype})
+	uploadInfo, err := client.PutObject(context.Background(), bucketName, objectName, reader, size, minio.PutObjectOptions{ContentType: conttype})
 	if err != nil {
 		log.Fatalln(err)
 		return uploadInfo, err
